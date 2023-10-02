@@ -8,7 +8,7 @@ Nginx is configured in DemoConfig/nginx.conf file. It uses port 4000 and configu
 
 # Starting the project
 
-Project can be started with Docker by running command: <strong>docker-compose up --scale backend=4</strong> from DemoConfig folder. /
+Project can be started with Docker by running command: <strong>docker-compose up --scale backend=4</strong> from DemoConfig folder. \
 We start 4 different containers for app1 (called backend in docker-compose file) to demonstrate load balancing ability. In docker-compose we expose port 4000 for nginx server.
 
 # Examples
@@ -16,19 +16,19 @@ We start 4 different containers for app1 (called backend in docker-compose file)
 
 Here we are calling endpoint from app1. We can see the results and headers. After first call cache is missed end after second call onwards the cache is hit. In 4th picture we can see that nginx server called the endpoint only once. After we remove cache from config, we can see in 5th picure that all 4 containers (servers) are called in round robin fashion on every request as a load balancing technique.
 
-![Alt text](Examples/image1.png) /
-![Alt text](Examples/image2.png) /
-![Alt text](Examples/image3.png) /
-![Alt text](Examples/image4.png) /
+![Alt text](Examples/image1.png) \
+![Alt text](Examples/image2.png) \
+![Alt text](Examples/image3.png) \
+![Alt text](Examples/image4.png) \
 ![Alt text](Examples/image5.png)
 
 ## Kafka message broker
 
 We enabled Kafka with app2 endpoints. First, let's create topic under a name "topic1". Then, we will post messages to topic "topic1". After that, we will subscribe to "topic1" and listen to messages. Of course, consumer service can be some third party app, but here we implemented producer and cosumer in the same app for convenience purposes.
 
-![Alt text](Examples/image6.png) /
-![Alt text](Examples/image7.png) /
-![Alt text](Examples/image8.png) /
-![Alt text](Examples/image9.png) /
+![Alt text](Examples/image6.png) \ 
+![Alt text](Examples/image7.png) \
+![Alt text](Examples/image8.png) \
+![Alt text](Examples/image9.png) \
 ![Alt text](Examples/image10.png)
  
