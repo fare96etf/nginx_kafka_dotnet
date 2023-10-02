@@ -1,7 +1,6 @@
 version: "3.9"
 services:
   backend:
-    container_name: backend_app1
     build: ../Demo App/
     expose: 
       - "5000"

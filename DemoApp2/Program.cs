@@ -1,3 +1,8 @@
+using Confluent.Kafka;
+using Confluent.Kafka.Admin;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -14,30 +19,87 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-var summaries = new[]
+app.MapGet("/testApi", () =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weather", () =>
-{
-    Console.WriteLine("Weather forecast from app2 is called");
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    Console.WriteLine("Test API from app2 is called");
+    return "testApi";
 })
-.WithName("GetWeatherForecast")
+.WithName("GetTestApi")
 .WithOpenApi();
+
+app.MapPost("/create-topic/{topic}", async ([FromRoute] string topic) =>
+{
+    using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "kafka:9092" }).Build())
+    {
+        try
+        {
+            await adminClient.CreateTopicsAsync(new TopicSpecification[] {
+                    new TopicSpecification { Name = topic, ReplicationFactor = 1, NumPartitions = 1 } })
+
+;           Console.WriteLine($"Topic {topic} successfully created.");
+        }
+        catch (CreateTopicsException e)
+        {
+            Console.WriteLine($"An error occured creating topic {e.Results[0].Topic}: {e.Results[0].Error.Reason}");
+        }
+    }
+})
+.WithName("KafkaTopic")
+.WithOpenApi();
+
+app.MapPost("/queue/{topic}", ([FromRoute] string topic, [FromBody] ProducerBody producerRequest) =>
+{
+    var config = new ProducerConfig
+    {
+        BootstrapServers = "kafka:9092"
+    };
+    using var producer = new ProducerBuilder<Null, string>(config).Build();
+
+    var topicMessage = new Message<Null, string> { Value = producerRequest.Message != null ? producerRequest.Message : "Default Mesagge" };
+    producer.Produce(topic, topicMessage, deliveryReport => {
+        Console.WriteLine(deliveryReport.Message.Value);
+    });
+})
+.WithName("KafkaProducer")
+.WithOpenApi();
+
+app.MapGet("/queue/{topic}", ([FromRoute] string topic) =>
+{
+    var config = new ConsumerConfig
+    {
+        BootstrapServers = "kafka:9092",
+        GroupId = topic,
+        AutoOffsetReset = Confluent.Kafka.AutoOffsetReset.Earliest
+    };
+    using var consumer = new ConsumerBuilder<Ignore, string>(config).Build();
+    consumer.Subscribe(topic);
+
+    while (true)
+    {
+        try
+        {
+            var message = consumer.Consume();
+            Console.WriteLine($"Received message: {message.Message.Value}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+})
+.WithName("KafkaConsumer")
+.WithOpenApi();
+
+var config = new ConsumerConfig
+{
+    BootstrapServers = "host1:9092,host2:9092",
+    GroupId = "foo",
+    AutoOffsetReset = AutoOffsetReset.Earliest
+};
 
 app.Run();
 
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+internal class ProducerBody
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public string? Message { get; set; }
 }
