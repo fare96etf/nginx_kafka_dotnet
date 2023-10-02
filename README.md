@@ -1,6 +1,6 @@
 # Project description
 
-This project is used to demonstrate how to use nginx as a reverse proxy and load balancer with caching ability, as well as how to use Kafka as a message broker within the dotnet apps. It consists of two dotnet Web Api projects. First project has one simple endpoint that return cities from an array. Second project has endpoints for creating Kafka topics, publishing messages and subscribing to those topics. Also, it is showcased how to start these features witin the docker containers.
+This project is used to demonstrate how to use nginx as a reverse proxy and load balancer with caching ability, as well as how to use Kafka as a message broker within the dotnet apps. It consists of two dotnet Web Api projects. First project has one simple endpoint that return cities from an array. Second project has endpoints for creating Kafka topics, publishing messages and subscribing to those topics. Also, it is showcased how to start these features within the docker containers.
 
 # Nginx configuration
 
